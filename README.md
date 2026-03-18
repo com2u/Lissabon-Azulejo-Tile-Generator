@@ -33,6 +33,24 @@ A web-based decorative tile generator inspired by traditional Portuguese azulejo
 - Save and load configurations locally
 - Grid preview (2×2, 3×3, 4×4)
 
+## Screenshots
+
+### Application Interface
+
+![Screen 1](tiles/screen1.png)
+
+![Screen 2](tiles/screen2.png)
+
+### Generated Tile Collections
+
+![Collection 1](tiles/collection1.svg)
+
+![Collection 2](tiles/collection2.svg)
+
+![Collection 3](tiles/collection3.svg)
+
+![Collection 4](tiles/collection4.svg)
+
 ## Quick Start
 
 ### Option 1: Run Locally
