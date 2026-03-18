@@ -24,7 +24,6 @@ COPY --chown=appuser:appgroup favicon.svg ./
 
 # Copy directories
 COPY --chown=appuser:appgroup js/ ./js/
-COPY --chown=appuser:appgroup css/ ./css/
 COPY --chown=appuser:appgroup tiles/ ./tiles/
 
 # Switch to non-root user
