@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lissabon - Azulejo Tile Generator</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <img src="favicon.svg" alt="Logo" class="logo">
+            <h1>Lissabon</h1>
+            <span class="subtitle">Azulejo Generator</span>
+        </div>
+        <div class="header-actions">
+            <button id="canvasBtn" class="btn btn-secondary" title="Canvas Background Generator (Ctrl+G)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="3" y1="9" x2="21" y2="9"/>
+                    <line x1="9" y1="21" x2="9" y2="9"/>
+                </svg>
+                Canvas
+            </button>
+            <button id="tileGeneratorBtn" class="btn btn-secondary" title="Back to Tile Generator" style="display: none;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+                    <polyline points="2 17 12 22 22 17"/>
+                    <polyline points="2 12 12 17 22 12"/>
+                </svg>
+                Tile Generator
+            </button>
+            <button id="generateBtn" class="btn btn-generate" title="Generate Tile (Enter)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                </svg>
+                Generate <span class="shortcut">Enter</span>
+            </button>
+            <button id="regenerateBtn" class="btn btn-secondary" title="Regenerate (R)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="23 4 23 10 17 10"/>
+                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                </svg>
+                Regenerate <span class="shortcut">R</span>
+            </button>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="23 4 23 10 17 10"/>
+                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                </svg>
+                Regenerate
+            </button>
+            <button id="canvasRegenerateBtn" class="btn btn-secondary" title="Regenerate Canvas (Enter)" style="display: none;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="23 4 23 10 17 10"/>
+                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                </svg>
+                Regenerate
+            </button>
+            <button id="canvasExportSvgBtn" class="btn btn-secondary" title="Export Canvas as SVG" style="display: none;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                SVG
+            </button>
+            <button id="canvasExportPngBtn" class="btn btn-secondary" title="Export Canvas as PNG" style="display: none;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                PNG
+            </button>
+            <button id="exportSvgBtn" class="btn btn-secondary" title="Export as SVG (Ctrl+S)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                SVG
+            </button>
+            <button id="exportPngBtn" class="btn btn-secondary" title="Export as PNG">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                PNG
+            </button>
+            <button id="saveConfigBtn" class="btn btn-primary" title="Save Configuration (Ctrl+Shift+S)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                    <polyline points="17 21 17 13 7 13 7 21"/>
+                    <polyline points="7 3 7 8 15 8"/>
+                </svg>
+                Save
+            </button>
+            <button id="loadConfigBtn" class="btn btn-primary" title="Load Configuration (Ctrl+O)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                </svg>
+                Load
+            </button>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <aside class="control-panel">
+            <!-- Generator Section -->
+            <section class="panel-section">
+                <h2 class="section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+                        <polyline points="2 17 12 22 22 17"/>
+                        <polyline points="2 12 12 17 22 12"/>
+                    </svg>
+                    Generator <kbd>Enter</kbd>
+                </h2>
+                <div class="control-group">
+                    <label for="patternType">Pattern Type <kbd>P</kbd></label>
+                    <select id="patternType" class="select-input">
+                        <option value="geometric">Geometric</option>
+                        <option value="floral">Floral</option>
+                        <option value="ornamental">Ornamental</option>
+                        <option value="striped">Striped</option>
+                        <option value="checker">Checker</option>
+                        <option value="radial">Radial</option>
+                        <option value="celtic">Celtic</option>
+                        <option value="moroccan">Moroccan</option>
+                        <option value="baroque">Baroque</option>
+                        <option value="kaleidoscope">Kaleidoscope</option>
+                        <option value="guilloché">Guilloché</option>
+                        <option value="lace">Lace / Filigree</option>
+                        <option value="interlace">Interlace / Knotwork</option>
+                        <option value="tessellation">Tessellation</option>
+                        <option value="chisel">Chisel / Engraved</option>
+                        <option value="ribbon">Ribbon Ornament</option>
+                        <option value="petal">Petal Field</option>
+                        <option value="lattice">Lattice</option>
+                        <option value="halo">Halo / Concentric</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="subPattern">Sub Pattern <kbd>S</kbd></label>
+                    <select id="subPattern" class="select-input">
+                        <option value="grid">Grid</option>
+                        <option value="diamond">Diamond</option>
+                        <option value="hex">Hexagonal</option>
+                    </select>
+                </div>
+            </section>
+
+            <!-- Seed Section -->
+            <section class="panel-section">
+                <h2 class="section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 16v-4"/>
+                        <path d="M12 8h.01"/>
+                    </svg>
+                    Seed <kbd>Space</kbd>
+                </h2>
+                <div class="control-group seed-group">
+                    <input type="number" id="seedInput" class="text-input" value="12345" min="0" max="999999" title="Seed Value">
+                    <button id="randomSeedBtn" class="btn btn-small" title="Random Seed (Space)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23 4 23 10 17 10"/>
+                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                        </svg>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Colors Section -->
+            <section class="panel-section">
+                <h2 class="section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="13.5" cy="6.5" r="2.5"/>
+                        <circle cx="19" cy="17" r="2"/>
+                        <circle cx="6" cy="12" r="3"/>
+                        <path d="M13.5 9v6l4 2"/>
+                    </svg>
+                    Colors <kbd>C</kbd>
+                </h2>
+                <div class="control-group">
+                    <label>Background Color</label>
+                    <div class="color-picker-group">
+                        <input type="color" id="bgColor" class="color-input" value="#ffffff">
+                        <input type="text" id="bgColorText" class="text-input color-text" value="#ffffff">
+                        <button class="btn-eyedropper" data-target="bgColor" title="Pick color from screen">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>Foreground Palette</label>
+                    <div id="paletteColors" class="palette-colors">
+                        <div class="palette-color-row">
+                            <input type="color" class="color-input palette-color" value="#1e3c72">
+                            <button class="btn-icon remove-color" title="Remove color">×</button>
+                        </div>
+                        <div class="palette-color-row">
+                            <input type="color" class="color-input palette-color" value="#2a5298">
+                            <button class="btn-icon remove-color" title="Remove color">×</button>
+                        </div>
+                        <div class="palette-color-row">
+                            <input type="color" class="color-input palette-color" value="#d4af37">
+                            <button class="btn-icon remove-color" title="Remove color">×</button>
+                        </div>
+                    </div>
+                    <button id="addColorBtn" class="btn btn-small btn-outline">+ Add Color</button>
+                </div>
+                <div class="control-group">
+                    <label>Preset Palettes <kbd>C</kbd></label>
+                    <select id="palettePreset" class="select-input">
+                        <option value="traditional">Traditional Portuguese</option>
+                        <option value="azul">Blue Variations</option>
+                        <option value="earth">Earth Tones</option>
+                        <option value="vibrant">Vibrant</option>
+                        <option value="monochrome">Monochrome</option>
+                        <option value="gold">Gold Accent</option>
+                        <option value="rainbow">Rainbow</option>
+                        <option value="pop">Pop Art</option>
+                        <option value="pastel">Pastel</option>
+                        <option value="retro">Retro</option>
+                        <option value="indian">Indian</option>
+                        <option value="neon">Neon</option>
+                        <option value="summer">Summer</option>
+                        <option value="winter">Winter</option>
+                        <option value="royalBlue">Royal Blue</option>
+                        <option value="cobalt">Cobalt & Gold</option>
+                        <option value="antique">Antique Engraving</option>
+                        <option value="luxury">Luxury Medallion</option>
+                        <option value="celestial">Celestial</option>
+                    </select>
+                </div>
+            </section>
+
+            <!-- Style Section -->
+            <section class="panel-section">
+                <h2 class="section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+                        <line x1="9" y1="9" x2="9.01" y2="9"/>
+                        <line x1="15" y1="9" x2="15.01" y2="9"/>
+                    </svg>
+                    Style <kbd>+/-</kbd>
+                </h2>
+                <div class="control-group">
+                    <label>Stroke Width: <span id="strokeWidthValue">2</span>px <kbd>+/-</kbd></label>
+                    <input type="range" id="strokeWidth" class="range-input" min="0" max="10" value="2" step="0.5">
+                </div>
+                <div class="control-group">
+                    <label>Fill Opacity: <span id="fillOpacityValue">80</span>%</label>
+                    <input type="range" id="fillOpacity" class="range-input" min="0" max="100" value="80">
+                </div>
+                <div class="control-group">
+                    <label>Complexity: <span id="complexityValue">5</span></label>
+                    <input type="range" id="complexity" class="range-input" min="1" max="10" value="5">
+                </div>
+            </section>
+
+            <!-- Symmetry Section -->
+            <section class="panel-section">
+                <h2 class="section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 3v18"/>
+                        <path d="M3 12h18"/>
+                        <path d="M5.6 5.6l12.8 12.8"/>
+                        <path d="M18.4 5.6L5.6 18.4"/>
+                    </svg>
+                    Symmetry <kbd>Y</kbd>
+                </h2>
+                <div class="radio-group">
+                    <label class="radio-label">
+                        <input type="radio" name="symmetry" value="none" checked>
+                        <span>None</span>
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="symmetry" value="horizontal">
+                        <span>Horizontal Mirror</span>
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="symmetry" value="vertical">
+                        <span>Vertical Mirror</span>
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="symmetry" value="both">
+                        <span>Quadruple (Both)</span>
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="symmetry" value="rotational">
+                        <span>4-Fold Rotational</span>
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="symmetry" value="radial">
+                        <span>8-Fold Radial</span>
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="symmetry" value="diagonal-falling">
+                        <span>Diagonal Falling ↘</span>
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="symmetry" value="diagonal-rising">
+                        <span>Diagonal Rising ↗</span>
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="symmetry" value="diagonal-both">
+                        <span>Diagonal Both</span>
+                    </label>
+                </div>
+            </section>
+
+            <!-- Borders Section -->
+            <section class="panel-section">
+                <h2 class="section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    </svg>
+                    Borders <kbd>B</kbd>
+                </h2>
+                <div class="control-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="enableBorder" checked>
+                        <span>Enable Border</span>
+                    </label>
+                </div>
+                <div class="control-group" id="borderStyleGroup">
+                    <label for="borderStyle">Border Style</label>
+                    <select id="borderStyle" class="select-input">
+                        <option value="none">None</option>
+                        <option value="simple">Simple</option>
+                        <option value="double">Double Line</option>
+                        <option value="ornate">Ornate</option>
+                        <option value="wave">Wave</option>
+                        <option value="dotted">Dotted</option>
+                        <option value="zigzag">Zigzag</option>
+                        <option value="geometric">Geometric</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Border Color</label>
+                    <div class="color-picker-group">
+                        <input type="color" id="borderColor" class="color-input" value="#1e3c72">
+                        <input type="text" id="borderColorText" class="text-input color-text" value="#1e3c72">
+                        <button class="btn-eyedropper" data-target="borderColor" title="Pick color from screen">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>Border Width: <span id="borderWidthValue">8</span>px</label>
+                    <input type="range" id="borderWidth" class="range-input" min="2" max="20" value="8">
+                </div>
+                <div class="control-group">
+                    <label>Border Opacity: <span id="borderOpacityValue">100</span>%</label>
+                    <input type="range" id="borderOpacity" class="range-input" min="0" max="100" value="100">
+                </div>
+            </section>
+
+            <!-- Corners Section -->
+            <section class="panel-section">
+                <h2 class="section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 3h7v7H3z"/>
+                        <path d="M14 3h7v7h-7z"/>
+                        <path d="M3 14h7v7H3z"/>
+                        <path d="M14 14h7v7h-7z"/>
+                    </svg>
+                    Corners <kbd>X</kbd>
+                </h2>
+                <div class="control-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="enableCorners" checked>
+                        <span>Enable Corner Decorations</span>
+                    </label>
+                </div>
+                <div class="control-group" id="cornerStyleGroup">
+                    <label for="cornerStyle">Corner Style</label>
+                    <select id="cornerStyle" class="select-input">
+                        <option value="none">None</option>
+                        <option value="simple">Simple</option>
+                        <option value="flourish">Flourish</option>
+                        <option value="diamond">Diamond</option>
+                        <option value="shell">Shell</option>
+                        <option value="wave">Wave</option>
+                        <option value="star">Star</option>
+                        <option value="leaf">Leaf</option>
+                        <option value="curved">Curved</option>
+                        <option value="arcs">Arcs</option>
+                        <option value="spiral">Spiral</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Corner Stroke Width: <span id="cornerStrokeWidthValue">2</span>px</label>
+                    <input type="range" id="cornerStrokeWidth" class="range-input" min="0" max="10" value="2" step="0.5">
+                </div>
+                <div class="control-group">
+                    <label>Corner Opacity: <span id="cornerOpacityValue">100</span>%</label>
+                    <input type="range" id="cornerOpacity" class="range-input" min="0" max="100" value="100">
+                </div>
+            </section>
+
+            <!-- Centerpiece Section -->
+            <section class="panel-section">
+                <h2 class="section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                    </svg>
+                    Centerpiece <kbd>Z</kbd>
+                </h2>
+                <div class="control-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="enableCenter">
+                        <span>Enable Centerpiece</span>
+                    </label>
+                </div>
+                <div class="control-group" id="centerTypeGroup" style="display: none;">
+                    <label for="centerType">Center Type</label>
+                    <select id="centerType" class="select-input">
+                        <option value="none">None</option>
+                        <option value="circle">Circle</option>
+                        <option value="star">Star</option>
+                        <option value="flower">Flower</option>
+                        <option value="diamond">Diamond</option>
+                        <option value="mandala">Mandala</option>
+                        <option value="spiral">Spiral</option>
+                        <option value="heart">Heart</option>
+                        <option value="cross">Cross</option>
+                        <option value="hexagon">Hexagon</option>
+                        <option value="rosette">Rosette</option>
+                        <option value="compass">Compass</option>
+                        <option value="crown">Crown</option>
+                        <option value="sun">Sun</option>
+                        <option value="target">Target</option>
+                        <option value="arrow">Arrow</option>
+                        <option value="fleur">Fleur-de-lis</option>
+                        <option value="anchor">Anchor</option>
+                        <option value="yinYang">Yin Yang</option>
+                        <option value="infinity">Infinity</option>
+                        <option value="trebleClef">Treble Clef</option>
+                        <option value="book">Book</option>
+                        <option value="gem">Gem</option>
+                        <option value="key">Key</option>
+                        <option value="butterfly">Butterfly</option>
+                    </select>
+                </div>
+                <div class="control-group" id="centerSizeGroup" style="display: none;">
+                    <label>Center Size: <span id="centerSizeValue">50</span>%</label>
+                    <input type="range" id="centerSize" class="range-input" min="10" max="100" value="50">
+                </div>
+                <div class="control-group" id="centerStrokeGroup" style="display: none;">
+                    <label>Center Stroke Width: <span id="centerStrokeWidthValue">2</span>px</label>
+                    <input type="range" id="centerStrokeWidth" class="range-input" min="0" max="10" value="2" step="0.5">
+                </div>
+                <div class="control-group" id="centerOpacityGroup" style="display: none;">
+                    <label>Center Opacity: <span id="centerOpacityValue">100</span>%</label>
+                    <input type="range" id="centerOpacity" class="range-input" min="0" max="100" value="100">
+                </div>
+            </section>
+
+            <!-- Grid Preview Section -->
+            <section class="panel-section">
+                <h2 class="section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"/>
+                        <rect x="14" y="3" width="7" height="7"/>
+                        <rect x="14" y="14" width="7" height="7"/>
+                        <rect x="3" y="14" width="7" height="7"/>
+                    </svg>
+                    Preview <kbd>G</kbd>
+                </h2>
+                <div class="control-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="showGrid">
+                        <span>Show Grid Preview</span>
+                    </label>
+                </div>
+                <div class="control-group" id="gridSizeGroup" style="display: none;">
+                    <label for="gridSize">Grid Size</label>
+                    <select id="gridSize" class="select-input">
+                        <option value="2">2 × 2</option>
+                        <option value="3" selected>3 × 3</option>
+                        <option value="4">4 × 4</option>
+                    </select>
+                </div>
+            </section>
+
+            <!-- Generate Section (moved to header) -->
+        </aside>
+
+        <!-- Canvas Control Panel -->
+        <aside id="canvasControlPanel" class="control-panel" style="display: none;">
+            <section class="panel-section">
+                <h2 class="section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="3" y1="9" x2="21" y2="9"/>
+                        <line x1="9" y1="21" x2="9" y2="9"/>
+                    </svg>
+                    Canvas Settings
+                </h2>
+                <div class="control-group">
+                    <label for="canvasAlgorithm">Generation Algorithm</label>
+                    <select id="canvasAlgorithm" class="select-input">
+                        <option value="clustered">Clustered (Current)</option>
+                        <option value="pattern">Pattern (New)</option>
+                        <option value="procedural">Procedural (Old)</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="canvasWidth">Canvas Width (tiles)</label>
+                    <input type="number" id="canvasWidth" class="text-input" value="16" min="2" max="20">
+                </div>
+                <div class="control-group">
+                    <label for="canvasHeight">Canvas Height (tiles)</label>
+                    <input type="number" id="canvasHeight" class="text-input" value="9" min="2" max="20">
+                </div>
+                <div class="control-group">
+                    <label>Cluster Size: <span id="clusterSizeValue">4</span></label>
+                    <input type="range" id="clusterSize" class="range-input" min="1" max="8" value="4">
+                </div>
+                <div class="control-group">
+                    <label>Cluster Probability: <span id="clusterProbValue">60</span>%</label>
+                    <input type="range" id="clusterProb" class="range-input" min="0" max="100" value="60">
+                </div>
+                <div class="control-group">
+                    <label>Overlap: <span id="overlapValue">0</span>%</label>
+                    <input type="range" id="overlap" class="range-input" min="0" max="75" value="0">
+                </div>
+                <div class="control-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="allowRotation" checked>
+                        <span>Allow Tile Rotation</span>
+                    </label>
+                </div>
+                <div class="control-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="allowFlip" checked>
+                        <span>Allow Tile Flip</span>
+                    </label>
+                </div>
+            </section>
+            
+            <section class="panel-section">
+                <h2 class="section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    </svg>
+                    Canvas Border
+                </h2>
+                <div class="control-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="enableCanvasBorder">
+                        <span>Enable Canvas Border</span>
+                    </label>
+                </div>
+                <div class="control-group">
+                    <label>Border Color</label>
+                    <div class="color-picker-group">
+                        <input type="color" id="canvasBorderColor" class="color-input" value="#1e3c72">
+                        <input type="text" id="canvasBorderColorText" class="text-input color-text" value="#1e3c72">
+                        <button class="btn-eyedropper" data-target="canvasBorderColor" title="Pick color from screen">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>Tile Border Color</label>
+                    <div class="color-picker-group">
+                        <input type="color" id="canvasTileBorderColor" class="color-input" value="#ffffff">
+                        <input type="text" id="canvasTileBorderColorText" class="text-input color-text" value="#ffffff">
+                        <button class="btn-eyedropper" data-target="canvasTileBorderColor" title="Pick color from screen">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>Border Width: <span id="canvasBorderWidthValue">10</span>px</label>
+                    <input type="range" id="canvasBorderWidth" class="range-input" min="1" max="50" value="10">
+                </div>
+            </section>
+            
+            <section class="panel-section">
+                <h2 class="section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+                        <line x1="7" y1="7" x2="7.01" y2="7"/>
+                    </svg>
+                    Tile Selection
+                </h2>
+                <p class="hint-text">Select tiles from the gallery below to use in the canvas.</p>
+                <div class="selected-count">
+                    <span id="selectedCount">0</span> tiles selected
+                </div>
+                <button id="backToGalleryBtn" class="btn btn-outline" style="width: 100%; margin-top: 8px; display: none;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <path d="M7 7h10M7 12h10M7 17h10"/>
+                    </svg>
+                    Change Selection
+                </button>
+            </section>
+            
+            <section class="panel-section">
+                <button id="generateCanvasBtn" class="btn btn-generate" style="width: 100%;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                    </svg>
+                    Generate Canvas
+                </button>
+                <button id="regenerateCanvasBtn" class="btn btn-secondary" style="width: 100%; margin-top: 8px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="23 4 23 10 17 10"/>
+                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                    </svg>
+                    Regenerate
+                </button>
+            </section>
+            
+            <section class="panel-section">
+                <h2 class="section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    Export
+                </h2>
+                <button id="exportCanvasSvgBtn" class="btn btn-secondary" style="width: 100%;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    Export SVG
+                </button>
+                <button id="exportCanvasPngBtn" class="btn btn-secondary" style="width: 100%; margin-top: 8px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    Export PNG
+                </button>
+            </section>
+        </aside>
+
+        <section class="canvas-area" id="mainCanvasArea">
+            <div class="canvas-container">
+                <div id="tilePreview" class="tile-preview">
+                    <!-- SVG will be rendered here -->
+                </div>
+                <div id="gridPreview" class="grid-preview" style="display: none;">
+                    <!-- Grid of tiles will be rendered here -->
+                </div>
+            </div>
+            <div class="tile-info">
+                <span id="tileInfo">Seed: 12345 | Pattern: Geometric</span>
+            </div>
+        </section>
+        
+        <!-- Canvas View (Tile Gallery + Canvas Preview) -->
+        <section id="canvasView" class="canvas-area" style="display: none;">
+            <!-- Tile Gallery -->
+            <div id="tileGallery" class="tile-gallery">
+                <div class="gallery-header">
+                    <h3 class="gallery-title">Select Tiles for Canvas</h3>
+                    <div class="gallery-actions">
+                        <button id="uploadTileBtn" class="btn btn-small btn-outline">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="17 8 12 3 7 8"/>
+                                <line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                            Upload Tile
+                        </button>
+                        <input type="file" id="tileFileInput" accept=".svg" style="display: none;" multiple>
+                    </div>
+                </div>
+                <div id="tileGalleryGrid" class="tile-gallery-grid">
+                    <!-- Tiles will be generated here -->
+                </div>
+            </div>
+            
+            <!-- Canvas Preview -->
+            <div id="canvasPreviewContainer" class="canvas-preview-container" style="display: none;">
+                <div class="canvas-container">
+                    <div id="canvasPreview" class="canvas-preview">
+                        <!-- Canvas will be rendered here -->
+                    </div>
+                </div>
+                <div class="tile-info">
+                    <span id="canvasInfo">Canvas generated</span>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <span>Lissabon v1.0</span>
+        <span>Portuguese Azulejo Tile Generator</span>
+        <span class="shortcuts-hint">Press <kbd>?</kbd> for keyboard shortcuts</span>
+    </footer>
+    
+    <!-- Keyboard Shortcuts Help Modal -->
+    <div id="shortcutsModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Keyboard Shortcuts</h2>
+                <button class="modal-close" id="closeShortcutsModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="shortcuts-grid">
+                    <div class="shortcut-section">
+                        <h3>Generation</h3>
+                        <div class="shortcut-row"><kbd>Enter</kbd> Generate new tile</div>
+                        <div class="shortcut-row"><kbd>R</kbd> Regenerate (same seed)</div>
+                        <div class="shortcut-row"><kbd>Space</kbd> Random seed + generate</div>
+                    </div>
+                    <div class="shortcut-section">
+                        <h3>Pattern Controls</h3>
+                        <div class="shortcut-row"><kbd>P</kbd> Next Pattern Type</div>
+                        <div class="shortcut-row"><kbd>S</kbd> Next Sub Pattern</div>
+                        <div class="shortcut-row"><kbd>C</kbd> Next Color Palette</div>
+                    </div>
+                    <div class="shortcut-section">
+                        <h3>Style Controls</h3>
+                        <div class="shortcut-row"><kbd>+</kbd> / <kbd>-</kbd> Stroke Width</div>
+                        <div class="shortcut-row"><kbd>B</kbd> Next Border Style</div>
+                        <div class="shortcut-row"><kbd>X</kbd> Next Corner Style</div>
+                        <div class="shortcut-row"><kbd>Y</kbd> Next Symmetry</div>
+                        <div class="shortcut-row"><kbd>Z</kbd> Next Centerpiece</div>
+                    </div>
+                    <div class="shortcut-section">
+                        <h3>View</h3>
+                        <div class="shortcut-row"><kbd>G</kbd> Toggle Grid Preview</div>
+                        <div class="shortcut-row"><kbd>?</kbd> Show this help</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Saved Configs Modal -->
+    <div id="savedConfigsModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Saved Configurations</h2>
+                <button class="modal-close" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body" id="savedConfigsList">
+                <!-- Saved configs will be listed here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Hidden file input for loading -->
+    <input type="file" id="configFileInput" accept=".json" style="display: none;">
+
+    <!-- Scripts -->
+    <script src="js/seedrandom.js"></script>
+    <script src="js/params.js"></script>
+    <script src="js/presets.js"></script>
+    <script src="js/storage.js"></script>
+    
+    <!-- Pattern Modules -->
+    <script src="js/patterns/base.js"></script>
+    <script src="js/patterns/symmetry.js"></script>
+    <script src="js/patterns/geometric.js"></script>
+    <script src="js/patterns/floral.js"></script>
+    <script src="js/patterns/ornamental.js"></script>
+    <script src="js/patterns/striped.js"></script>
+    <script src="js/patterns/checker.js"></script>
+    <script src="js/patterns/radial.js"></script>
+    <script src="js/patterns/advanced.js"></script>
+    
+    <!-- Component Modules -->
+    <script src="js/centerpiece.js"></script>
+    <script src="js/corners.js"></script>
+    <script src="js/borders.js"></script>
+    
+    <!-- Canvas Generator Module -->
+    <script src="js/canvas/generator.js"></script>
+    
+    <!-- Tile Generator Module -->
+    <script src="js/tileGenerator.js"></script>
+    
+    <!-- UI Modules -->
+    <script src="js/ui/tileGenerator.js"></script>
+    <script src="js/ui/canvasGenerator.js"></script>
+    
+    <!-- Main Application -->
+    <script src="js/app.js"></script>
+</body>
+</html>

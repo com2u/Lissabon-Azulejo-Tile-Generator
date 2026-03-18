@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lissabon - Tile Generator Test</title>
+    <style>
+        body {
+            font-family: 'Source Sans Pro', sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f0;
+        }
+        h1 {
+            color: #1e3c72;
+            border-bottom: 2px solid #d4af37;
+            padding-bottom: 10px;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+        }
+        .pass {
+            background: #d4edda;
+            color: #155724;
+        }
+        .fail {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .tiles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .tile-card {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .tile-card h4 {
+            margin: 10px 0 5px;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+        .tile-card p {
+            margin: 0;
+            font-size: 12px;
+            color: #5c6b7a;
+        }
+        button {
+            background: #1e3c72;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #2a5298;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        #log {
+            background: #1a1a1a;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧱 Lissabon Tile Generator - Test Suite</h1>
+    
+    <div class="test-section">
+        <h2>Test Controls</h2>
+        <button id="runTestsBtn" onclick="runTests()">Run All Tests</button>
+        <button id="generateTilesBtn" onclick="generateSampleTiles()">Generate Sample Tiles</button>
+        <button id="clearLogBtn" onclick="document.getElementById('log').innerHTML = ''">Clear Log</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Results</h2>
+        <div id="testResults"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Generated Tiles</h2>
+        <div id="tilesGrid" class="tiles-grid"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Log</h2>
+        <div id="log"></div>
+    </div>
+    
+    <script src="js/seedrandom.js"></script>
+    <script src="js/generator.js"></script>
+    
+    <script>
+        // Test parameters
+        const testPalette = ['#1e3c72', '#2a5298', '#d4af37', '#ffffff', '#228b22'];
+        
+        const defaultParams = {
+            patternType: 'geometric',
+            subPattern: 'grid',
+            seed: 12345,
+            bgColor: '#ffffff',
+            palette: testPalette,
+            strokeWidth: 2,
+            fillOpacity: 80,
+            complexity: 5,
+            symmetry: 'none',
+            enableBorder: true,
+            borderStyle: 'simple',
+            borderColor: '#1e3c72',
+            borderWidth: 8,
+            enableCorners: true,
+            cornerStyle: 'simple',
+            enableCenter: false,
+            centerType: 'circle',
+            showGrid: false,
+            gridSize: 3
+        };
+        
+        // Logging function
+        function log(msg) {
+            const logDiv = document.getElementById('log');
+            const time = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `<div>[${time}] ${msg}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        // Add test result
+        function addResult(name, passed, message) {
+            const resultsDiv = document.getElementById('testResults');
+            const div = document.createElement('div');
+            div.className = `test-result ${passed ? 'pass' : 'fail'}`;
+            div.innerHTML = `<strong>${name}:</strong> ${message}`;
+            resultsDiv.appendChild(div);
+        }
+        
+        // Test runner
+        async function runTests() {
+            log('Starting test suite...');
+            const resultsDiv = document.getElementById('testResults');
+            resultsDiv.innerHTML = '';
+            
+            let passed = 0;
+            let failed = 0;
+            
+            // Test 1: Basic generation
+            try {
+                const svg = Generator.generate(defaultParams);
+                if (svg && svg.startsWith('<svg')) {
+                    passed++;
+                    addResult('Basic SVG Generation', true, 'Valid SVG produced');
+                    log('✓ Basic SVG Generation passed');
+                } else {
+                    failed++;
+                    addResult('Basic SVG Generation', false, 'Invalid SVG');
+                    log('✗ Basic SVG Generation failed');
+                }
+            } catch (e) {
+                failed++;
+                addResult('Basic SVG Generation', false, e.message);
+                log('✗ Error: ' + e.message);
+            }
+            
+            // Test 2: Pattern types
+            const patternTypes = ['geometric', 'floral', 'ornamental', 'striped', 'checker', 'radial', 'celtic', 'moroccan', 'baroque'];
+            let patternPass = 0;
+            let patternFail = 0;
+            
+            for (const type of patternTypes) {
+                try {
+                    const params = { ...defaultParams, patternType: type };
+                    const svg = Generator.generate(params);
+                    if (svg && svg.length > 100) {
+                        patternPass++;
+                        log(`✓ Pattern type '${type}' works`);
+                    } else {
+                        patternFail++;
+                        log(`✗ Pattern type '${type}' failed`);
+                    }
+                } catch (e) {
+                    patternFail++;
+                    log(`✗ Error in '${type}': ${e.message}`);
+                }
+            }
+            
+            if (patternFail === 0) {
+                passed++;
+                addResult('All Pattern Types', true, `${patternPass} patterns working`);
+            } else {
+                failed++;
+                addResult('All Pattern Types', false, `${patternFail} patterns failed`);
+            }
+            
+            // Test 3: Color variations
+            try {
+                const palettes = {
+                    'Traditional': ['#1e3c72', '#2a5298', '#ffffff', '#228b22', '#d4af37'],
+                    'Blue': ['#1e3c72', '#2a5298', '#3b82f6', '#60a5fa', '#93c5fd'],
+                    'Earth': ['#8b4513', '#d2691e', '#deb887', '#cd853f', '#f5deb3']
+                };
+                
+                let palettePass = 0;
+                for (const [name, palette] of Object.entries(palettes)) {
+                    const params = { ...defaultParams, palette: palette };
+                    const svg = Generator.generate(params);
+                    if (svg && svg.length > 100) {
+                        palettePass++;
+                        log(`✓ Palette '${name}' works`);
+                    }
+                }
+                
+                if (palettePass === Object.keys(palettes).length) {
+                    passed++;
+                    addResult('Color Palettes', true, 'All palettes working');
+                } else {
+                    failed++;
+                    addResult('Color Palettes', false, 'Some palettes failed');
+                }
+            } catch (e) {
+                failed++;
+                addResult('Color Palettes', false, e.message);
+            }
+            
+            // Test 4: Seed reproducibility
+            try {
+                const params1 = { ...defaultParams, seed: 99999 };
+                const svg1 = Generator.generate(params1);
+                const svg2 = Generator.generate(params1);
+                
+                if (svg1 === svg2) {
+                    passed++;
+                    addResult('Seed Reproducibility', true, 'Same seed produces same result');
+                    log('✓ Seed reproducibility passed');
+                } else {
+                    failed++;
+                    addResult('Seed Reproducibility', false, 'Different results with same seed');
+                    log('✗ Seed reproducibility failed');
+                }
+            } catch (e) {
+                failed++;
+                addResult('Seed Reproducibility', false, e.message);
+            }
+            
+            // Test 5: Border options
+            try {
+                const borders = ['simple', 'double', 'ornate'];
+                let borderPass = 0;
+                
+                for (const border of borders) {
+                    const params = { ...defaultParams, borderStyle: border };
+                    const svg = Generator.generate(params);
+                    if (svg.includes('stroke=')) {
+                        borderPass++;
+                    }
+                }
+                
+                if (borderPass === borders.length) {
+                    passed++;
+                    addResult('Border Styles', true, 'All border styles working');
+                    log('✓ Border styles passed');
+                } else {
+                    failed++;
+                    addResult('Border Styles', false, 'Some borders failed');
+                }
+            } catch (e) {
+                failed++;
+                addResult('Border Styles', false, e.message);
+            }
+            
+            // Test 6: Centerpiece
+            try {
+                const centers = ['circle', 'star', 'flower', 'diamond'];
+                let centerPass = 0;
+                
+                for (const center of centers) {
+                    const params = { ...defaultParams, enableCenter: true, centerType: center };
+                    const svg = Generator.generate(params);
+                    if (svg && svg.length > 100) {
+                        centerPass++;
+                    }
+                }
+                
+                if (centerPass === centers.length) {
+                    passed++;
+                    addResult('Centerpiece Options', true, 'All centerpieces working');
+                    log('✓ Centerpiece options passed');
+                } else {
+                    failed++;
+                    addResult('Centerpiece Options', false, 'Some centerpieces failed');
+                }
+            } catch (e) {
+                failed++;
+                addResult('Centerpiece Options', false, e.message);
+            }
+            
+            // Summary
+            log(`\n=== TEST SUMMARY ===`);
+            log(`Passed: ${passed}`);
+            log(`Failed: ${failed}`);
+            
+            if (failed === 0) {
+                addResult('OVERALL', true, `All ${passed} tests passed!`);
+            } else {
+                addResult('OVERALL', false, `${failed} test(s) failed`);
+            }
+        }
+        
+        // Generate sample tiles
+        async function generateSampleTiles() {
+            log('Generating sample tiles...');
+            const grid = document.getElementById('tilesGrid');
+            grid.innerHTML = '';
+            
+            const samples = [
+                { name: 'Geometric Grid', type: 'geometric', sub: 'grid', seed: 12345 },
+                { name: 'Geometric Diamond', type: 'geometric', sub: 'diamond', seed: 23456 },
+                { name: 'Geometric Hex', type: 'geometric', sub: 'hex', seed: 34567 },
+                { name: 'Floral Rosette', type: 'floral', sub: 'rosette', seed: 45678 },
+                { name: 'Floral Vine', type: 'floral', sub: 'vine', seed: 56789 },
+                { name: 'Ornamental Corda', type: 'ornamental', sub: 'corda', seed: 67890 },
+                { name: 'Striped Horizontal', type: 'striped', sub: 'horizontal', seed: 78901 },
+                { name: 'Striped Chevron', type: 'striped', sub: 'chevron', seed: 89012 },
+                { name: 'Checker Classic', type: 'checker', sub: 'classic', seed: 90123 },
+                { name: 'Radial Mandala', type: 'radial', sub: 'mandala', seed: 11111 },
+                { name: 'Celtic Knot', type: 'celtic', sub: 'knot', seed: 22222 },
+                { name: 'Moroccan Zellij', type: 'moroccan', sub: 'zellij', seed: 33333 },
+                { name: 'Baroque Royal', type: 'baroque', sub: 'royal', seed: 44444 },
+                { name: 'Geometric Wave', type: 'geometric', sub: 'wave', seed: 55555 },
+                { name: 'Floral Paisley', type: 'floral', sub: 'paisley', seed: 66666 },
+                { name: 'Radial Sunburst', type: 'radial', sub: 'sunburst', seed: 77777 }
+            ];
+            
+            for (const sample of samples) {
+                try {
+                    const params = {
+                        ...defaultParams,
+                        patternType: sample.type,
+                        subPattern: sample.sub,
+                        seed: sample.seed
+                    };
+                    
+                    const svg = Generator.generate(params);
+                    
+                    // Create card
+                    const card = document.createElement('div');
+                    card.className = 'tile-card';
+                    card.innerHTML = `
+                        ${svg}
+                        <h4>${sample.name}</h4>
+                        <p>Seed: ${sample.seed}</p>
+                        <button onclick="downloadTile('${encodeURIComponent(svg)}', '${sample.name}')">Save</button>
+                    `;
+                    grid.appendChild(card);
+                    
+                    log(`✓ Generated: ${sample.name}`);
+                } catch (e) {
+                    log(`✗ Error generating ${sample.name}: ${e.message}`);
+                }
+            }
+            
+            log('Sample tile generation complete!');
+        }
+        
+        // Download tile
+        function downloadTile(svgEncoded, name) {
+            const svg = decodeURIComponent(svgEncoded);
+            const blob = new Blob([svg], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Tile_${name.replace(/\s+/g, '_')}.svg`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            log(`✓ Downloaded: ${name}`);
+        }
+        
+        // Initialize
+        log('Test page loaded. Click "Run All Tests" to begin.');
+    </script>
+</body>
+</html>
