@@ -53,7 +53,7 @@ A web-based decorative tile generator inspired by traditional Portuguese azulejo
 
 ## Quick Start
 
-### Option 1: Run Locally
+### Option 1: Run Locally (Python)
 ```bash
 # Clone or navigate to the project
 cd Lissabon
@@ -67,11 +67,180 @@ python3 -m http.server 8080
 open http://localhost:8080
 ```
 
-### Option 2: Use the Test Suite
+### Option 2: Run with Docker
+```bash
+# Build the Docker image
+docker build -t lissabon-azulejo .
+
+# Run the container
+docker run -d -p 8080:8080 --name lissabon lissabon-azulejo
+
+# Open in browser
+open http://localhost:8080
+
+# Stop the container when done
+docker stop lissabon && docker rm lissabon
+```
+
+### Option 3: Use the Test Suite
 ```bash
 # The test-tiles.html provides a comprehensive testing interface
 # Open in browser
 http://localhost:8080/test-tiles.html
+```
+
+## Docker Deployment
+
+### Build the Image
+```bash
+# Build the Docker image with a tag
+docker build -t lissabon-azulejo:latest .
+
+# Or build with no cache to ensure fresh dependencies
+docker build --no-cache -t lissabon-azulejo:latest .
+```
+
+### Run the Container
+```bash
+# Basic run (detached mode)
+docker run -d -p 8080:8080 --name lissabon lissabon-azulejo:latest
+
+# Run with custom port
+docker run -d -p 3000:8080 --name lissabon lissabon-azulejo:latest
+
+# Run with volume mounting for persistence
+docker run -d -p 8080:8080 -v $(pwd)/data:/app/data --name lissabon lissabon-azulejo:latest
+
+# View logs
+docker logs -f lissabon
+
+# Check health status
+docker inspect --format='{{.State.Health.Status}}' lissabon
+```
+
+### Docker Compose (Recommended for Easy Management)
+Create a `docker-compose.yml` file:
+
+```yaml
+version: '3.8'
+
+services:
+  lissabon:
+    build: .
+    container_name: lissabon-azulejo
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+```
+
+Then manage with:
+```bash
+# Start the container
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop and remove
+docker-compose down
+
+# Rebuild after changes
+docker-compose up -d --build
+```
+
+### Deploy to Production
+```bash
+# Build for production
+docker build -t lissabon-azulejo:prod .
+
+# Run with production flags
+docker run -d \
+  --restart=always \
+  --name lissabon-prod \
+  -p 8080:8080 \
+  lissabon-azulejo:prod
+
+# Or use Docker Compose with production settings
+docker-compose -f docker-compose.yml up -d --build
+```
+
+### Kubernetes Deployment (Optional)
+For Kubernetes deployments, create a `deployment.yaml`:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lissabon-azulejo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: lissabon-azulejo
+  template:
+    metadata:
+      labels:
+        app: lissabon-azulejo
+    spec:
+      containers:
+      - name: lissabon
+        image: lissabon-azulejo:latest
+        ports:
+        - containerPort: 8080
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lissabon-service
+spec:
+  selector:
+    app: lissabon-azulejo
+  ports:
+  - port: 80
+    targetPort: 8080
+  type: LoadBalancer
+```
+
+Apply with:
+```bash
+kubectl apply -f deployment.yaml
+```
+
+### Container Management Commands
+```bash
+# List running containers
+docker ps
+
+# Stop container
+docker stop lissabon
+
+# Remove container
+docker rm lissabon
+
+# Remove image
+docker rmi lissabon-azulejo:latest
+
+# View resource usage
+docker stats lissabon
+
+# Execute command in container
+docker exec -it lissabon sh
+
+# Copy files from container
+docker cp lissabon:/app/index.html ./backup/
 ```
 
 ## Project Structure & Architecture
